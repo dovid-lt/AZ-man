@@ -27,7 +27,8 @@ npm test             # בדיקות יחידה (Vitest)
 src/app/
   core/                  לוגיקה ללא UI
     models.ts            מודל הנתונים (פרויקט, תעריף, משמרת, מצב UI)
-    persisted-store.ts   בסיס ל-store ב-localStorage: קריאה מחדש לפני כל כתיבה + סנכרון בין לשוניות (storage event)
+    idb.ts               עטיפה מינימלית ל-IndexedDB (מסד az-man, store אחד kv)
+    persisted-store.ts   בסיס ל-store ב-IndexedDB: עדכון מיידי בזיכרון, שמירה ברקע תחת Web Lock עם קריאה מחדש + סנכרון בין לשוניות (BroadcastChannel)
     data.store.ts        פרויקטים, תעריפים, משמרות, הגדרות
     ui.store.ts          זיכרון מצב: פרויקט נוכחי, סינון דשבורד, פרמטרי דוח
     calc.ts              תמחור: פיצול לפי חצות ותעריף, זמן ללא תעריף, סיכומים
@@ -59,4 +60,4 @@ src/app/
 
 ## אחסון
 
-שני מפתחות ב-localStorage: `az-man.data.v1` (נתונים) ו-`az-man.ui.v1` (זיכרון מצב).
+מסד IndexedDB בשם `az-man`, object store `kv`, שני מפתחות: `az-man.data.v1` (נתונים) ו-`az-man.ui.v1` (זיכרון מצב). בטעינה הראשונה נתונים קיימים מ-localStorage (אותם מפתחות) מועברים ל-IndexedDB ונמחקים מ-localStorage.
