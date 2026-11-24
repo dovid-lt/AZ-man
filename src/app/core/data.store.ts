@@ -1,12 +1,16 @@
 import { Injectable, computed } from '@angular/core';
 import { AppData, Id, Project, Rate, Settings, Shift, isOpen, recordTime } from './models';
 import { PersistedStore, newId } from './persisted-store';
+import { dateKey } from './time';
 
 const KEY = 'az-man.data.v1';
 
+/** מזהה קבוע: עד הכתיבה הראשונה כל read() מחזיר defaults() חדש, ו-id אקראי היה משתנה בין קריאות. */
+const DEFAULT_PROJECT_ID = 'default';
+
 const defaults = (): AppData => ({
   version: 1,
-  projects: [],
+  projects: [{ id: DEFAULT_PROJECT_ID, name: 'כללי', active: true, rates: [] }],
   shifts: [],
   settings: { longShiftHours: 12 },
 });
@@ -64,6 +68,24 @@ export class DataStore extends PersistedStore<AppData> {
     return max;
   }
 
+  /** התעריף שבתוקף היום (תאריך ההתחלה האחרון שכבר הגיע). */
+  currentRate(projectId: Id, today = dateKey(Date.now())): Rate | undefined {
+    let cur: Rate | undefined;
+    for (const r of this.project(projectId)?.rates ?? []) {
+      if (r.startDate <= today && (!cur || r.startDate > cur.startDate)) cur = r;
+    }
+    return cur;
+  }
+
+  /** התעריף העתידי הקרוב, אם הוגדר. */
+  nextRate(projectId: Id, today = dateKey(Date.now())): Rate | undefined {
+    let next: Rate | undefined;
+    for (const r of this.project(projectId)?.rates ?? []) {
+      if (r.startDate > today && (!next || r.startDate < next.startDate)) next = r;
+    }
+    return next;
+  }
+
   // ---------- פרויקטים ----------
 
   addProject(name: string): Id {
@@ -92,6 +114,17 @@ export class DataStore extends PersistedStore<AppData> {
     this.mutate((d) =>
       d.projects.find((p) => p.id === projectId)?.rates.push({ id: newId(), ...rate }),
     );
+  }
+
+  /** תעריף מתאריך. אם כבר יש תעריף שמתחיל באותו תאריך — הוא מתעדכן במקום להוסיף שורה. */
+  setRate(projectId: Id, startDate: string, hourly: number): void {
+    this.mutate((d) => {
+      const p = d.projects.find((x) => x.id === projectId);
+      if (!p) return;
+      const same = p.rates.find((r) => r.startDate === startDate);
+      if (same) same.hourly = hourly;
+      else p.rates.push({ id: newId(), startDate, hourly });
+    });
   }
 
   updateRate(projectId: Id, rateId: Id, patch: Partial<Omit<Rate, 'id'>>): void {

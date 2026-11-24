@@ -8,6 +8,9 @@ export interface Rate {
   hourly: number;
 }
 
+/** תאריך ההתחלה של התעריף הראשון שמוזן לפרויקט: חל על כל השעות, מוצג כ"מההתחלה". */
+export const FIRST_RATE_DATE = '1970-01-01';
+
 export interface Project {
   id: Id;
   name: string;

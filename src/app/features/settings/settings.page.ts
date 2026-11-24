@@ -8,8 +8,8 @@ import { MatSlideToggleChange, MatSlideToggleModule } from '@angular/material/sl
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DataStore } from '../../core/data.store';
-import { Project, Rate } from '../../core/models';
-import { dateKey } from '../../core/time';
+import { FIRST_RATE_DATE, Project } from '../../core/models';
+import { parseDateKey, shortDate } from '../../core/time';
 import { DialogService } from '../../shared/dialogs/dialog.service';
 
 /** ניהול פרויקטים ותעריפים, והגדרת סף משמרת ארוכה. */
@@ -68,32 +68,37 @@ export class SettingsPage {
     if (ok) this.store.deleteProject(p.id);
   }
 
-  protected sortedRates(p: Project): Rate[] {
-    return [...p.rates].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  /**
+   * שדה התעריף היחיד. אין תעריף בתוקף — נוצר תעריף ראשון שחל על כל השעות.
+   * יש תעריף — נפתח חלון: מהיום / מתאריך אחר / תיקון התעריף הקיים.
+   */
+  protected async changeRate(p: Project, input: HTMLInputElement): Promise<void> {
+    const cur = this.store.currentRate(p.id);
+    const n = Number(input.value);
+    if (input.value.trim() !== '' && Number.isFinite(n) && n >= 0) {
+      if (!cur) {
+        this.store.setRate(p.id, FIRST_RATE_DATE, n);
+      } else if (n !== cur.hourly) {
+        const res = await this.dialogs.rateChange({
+          projectName: p.name,
+          oldHourly: cur.hourly,
+          newHourly: n,
+          currentStart: cur.startDate,
+        });
+        if (res?.mode === 'fix') this.store.updateRate(p.id, cur.id, { hourly: n });
+        else if (res) this.store.setRate(p.id, res.date, n);
+      }
+    }
+    // ה-binding לא מתעדכן כשהערך בתוקף לא השתנה (ביטול, תעריף עתידי) — מסנכרנים ידנית.
+    input.value = String(this.store.currentRate(p.id)?.hourly ?? '');
   }
 
-  protected addRate(p: Project): void {
-    const last = this.sortedRates(p).at(-1);
-    this.store.addRate(p.id, { startDate: dateKey(Date.now()), hourly: last?.hourly ?? 0 });
+  protected rateHistory(p: Project): void {
+    this.dialogs.rateHistory(p.id);
   }
 
-  protected setRateDate(p: Project, r: Rate, v: string): void {
-    if (v) this.store.updateRate(p.id, r.id, { startDate: v });
-  }
-
-  protected setRateValue(p: Project, r: Rate, v: number | string): void {
-    const n = Number(v);
-    if (Number.isFinite(n) && n >= 0) this.store.updateRate(p.id, r.id, { hourly: n });
-  }
-
-  protected async deleteRate(p: Project, r: Rate): Promise<void> {
-    const ok = await this.dialogs.confirm({
-      title: 'מחיקת תעריף',
-      message: `למחוק את התעריף ₪ ${r.hourly} מ-${r.startDate}? הסכומים יחושבו מחדש.`,
-      ok: 'מחיקה',
-      danger: true,
-    });
-    if (ok) this.store.deleteRate(p.id, r.id);
+  protected dateLabel(key: string): string {
+    return shortDate(parseDateKey(key));
   }
 
   protected setLongShift(v: number | string): void {

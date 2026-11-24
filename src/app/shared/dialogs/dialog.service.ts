@@ -11,6 +11,8 @@ import { DayDetailDialog } from './day-detail.dialog';
 import { FixBrokenDialog } from './fix-broken.dialog';
 import { MidnightChoice, MidnightData, MidnightDialog } from './midnight.dialog';
 import { PeriodDetailDialog } from './period-detail.dialog';
+import { RateChangeData, RateChangeDialog, RateChangeResult } from './rate-change.dialog';
+import { RateHistoryDialog } from './rate-history.dialog';
 import { PunchAtData, PunchAtDialog, PunchAtResult } from './punch-at.dialog';
 import { ShiftEditDialog } from './shift-edit.dialog';
 import { TimePromptData, TimePromptDialog } from './time-prompt.dialog';
@@ -71,6 +73,14 @@ export class DialogService {
 
   periodDetail(title: string, range: TimeRange, filter: ProjectFilter): Promise<unknown> {
     return this.open(PeriodDetailDialog, { title, range, filter }, '720px');
+  }
+
+  rateChange(data: RateChangeData): Promise<RateChangeResult | undefined> {
+    return this.open<RateChangeData, RateChangeResult>(RateChangeDialog, data, '480px');
+  }
+
+  rateHistory(projectId: Id): Promise<unknown> {
+    return this.open(RateHistoryDialog, { projectId }, '520px');
   }
 
   private isBroken(id: Id): boolean {
