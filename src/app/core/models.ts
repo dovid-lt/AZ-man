@@ -16,6 +16,8 @@ export interface Project {
   name: string;
   active: boolean;
   rates: Rate[];
+  /** נבחר במכוון "ללא תעריף": לא שואלים על תעריף בכניסה ולא מציגים אזהרות. מתאפס בהזנת תעריף. */
+  noRate?: boolean;
 }
 
 /**

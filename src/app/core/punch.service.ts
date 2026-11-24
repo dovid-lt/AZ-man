@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DialogService } from '../shared/dialogs/dialog.service';
 import { DataStore } from './data.store';
-import { Id } from './models';
+import { FIRST_RATE_DATE, Id } from './models';
 import { hm, nextMidnight, sameDay, shortDate } from './time';
 
 export type Direction = 'in' | 'out';
@@ -35,6 +35,7 @@ export class PunchService {
 
   /** מקרה 1: כניסה כשכבר יש כניסה פתוחה. */
   async punchIn(projectId: Id, at = Date.now()): Promise<boolean> {
+    if (!(await this.ensureRate(projectId))) return false;
     const name = this.store.projectName(projectId);
     const open = this.store.openShift(projectId);
     if (open) {
@@ -62,6 +63,7 @@ export class PunchService {
     const open = this.store.openShift(projectId);
 
     if (!open) {
+      if (!(await this.ensureRate(projectId))) return false;
       const t = await this.dialogs.promptTime({
         title: 'חסרה כניסה',
         message:
@@ -121,6 +123,19 @@ export class PunchService {
       initial: now,
     });
     if (t != null) await this.punchOut(s.projectId, t);
+  }
+
+  /**
+   * פרויקט בלי תעריף ובלי בחירה ב"ללא תעריף" — שואלים לפני הרישום.
+   * סגירת החלון בלי תשובה מבטלת את הפעולה (false).
+   */
+  private async ensureRate(projectId: Id): Promise<boolean> {
+    if (!this.store.needsRate(projectId)) return true;
+    const res = await this.dialogs.initialRate({ projectName: this.store.projectName(projectId) });
+    if (res == null) return false;
+    if (res === 'none') this.store.updateProject(projectId, { noRate: true });
+    else this.store.setRate(projectId, FIRST_RATE_DATE, res);
+    return true;
   }
 
   private notify(msg: string): void {

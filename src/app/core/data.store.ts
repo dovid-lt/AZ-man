@@ -1,5 +1,15 @@
 import { Injectable, computed } from '@angular/core';
-import { AppData, Id, Project, Rate, Settings, Shift, isOpen, recordTime } from './models';
+import {
+  AppData,
+  FIRST_RATE_DATE,
+  Id,
+  Project,
+  Rate,
+  Settings,
+  Shift,
+  isOpen,
+  recordTime,
+} from './models';
 import { PersistedStore, newId } from './persisted-store';
 import { dateKey } from './time';
 
@@ -88,13 +98,22 @@ export class DataStore extends PersistedStore<AppData> {
 
   // ---------- פרויקטים ----------
 
-  addProject(name: string): Id {
+  /** hourly — תעריף ראשון אופציונלי, שחל על כל השעות. */
+  addProject(name: string, hourly?: number | null): Id {
     const id = newId();
-    this.mutate((d) => d.projects.push({ id, name: name.trim(), active: true, rates: [] }));
+    const rates: Rate[] =
+      hourly == null ? [] : [{ id: newId(), startDate: FIRST_RATE_DATE, hourly }];
+    this.mutate((d) => d.projects.push({ id, name: name.trim(), active: true, rates }));
     return id;
   }
 
-  updateProject(id: Id, patch: Partial<Pick<Project, 'name' | 'active'>>): void {
+  /** צריך לשאול על תעריף: אין לפרויקט שום תעריף ולא נבחר "ללא תעריף". */
+  needsRate(projectId: Id): boolean {
+    const p = this.project(projectId);
+    return !!p && !p.noRate && p.rates.length === 0;
+  }
+
+  updateProject(id: Id, patch: Partial<Pick<Project, 'name' | 'active' | 'noRate'>>): void {
     this.mutate((d) => {
       const p = d.projects.find((x) => x.id === id);
       if (p) Object.assign(p, patch);
@@ -111,9 +130,12 @@ export class DataStore extends PersistedStore<AppData> {
   }
 
   addRate(projectId: Id, rate: Omit<Rate, 'id'>): void {
-    this.mutate((d) =>
-      d.projects.find((p) => p.id === projectId)?.rates.push({ id: newId(), ...rate }),
-    );
+    this.mutate((d) => {
+      const p = d.projects.find((x) => x.id === projectId);
+      if (!p) return;
+      p.rates.push({ id: newId(), ...rate });
+      delete p.noRate;
+    });
   }
 
   /** תעריף מתאריך. אם כבר יש תעריף שמתחיל באותו תאריך — הוא מתעדכן במקום להוסיף שורה. */
@@ -124,6 +146,7 @@ export class DataStore extends PersistedStore<AppData> {
       const same = p.rates.find((r) => r.startDate === startDate);
       if (same) same.hourly = hourly;
       else p.rates.push({ id: newId(), startDate, hourly });
+      delete p.noRate;
     });
   }
 

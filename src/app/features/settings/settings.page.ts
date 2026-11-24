@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -32,13 +32,9 @@ export class SettingsPage {
   private readonly dialogs = inject(DialogService);
   private readonly snack = inject(MatSnackBar);
 
-  protected readonly newName = signal('');
-
-  protected addProject(): void {
-    const name = this.newName().trim();
-    if (!name) return;
-    this.store.addProject(name);
-    this.newName.set('');
+  protected async addProject(): Promise<void> {
+    const res = await this.dialogs.newProject();
+    if (res) this.store.addProject(res.name, res.hourly);
   }
 
   protected rename(p: Project, name: string): void {

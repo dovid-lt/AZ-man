@@ -1,15 +1,9 @@
 <section class="card">
   <h2>פרויקטים ותעריפים</h2>
 
-  <form class="row add" (submit)="$event.preventDefault(); addProject()">
-    <mat-form-field subscriptSizing="dynamic" class="grow">
-      <mat-label>שם פרויקט חדש</mat-label>
-      <input matInput name="newName" [ngModel]="newName()" (ngModelChange)="newName.set($event)" />
-    </mat-form-field>
-    <button mat-flat-button type="submit" [disabled]="!newName().trim()">
-      <mat-icon>add</mat-icon> הוספה
-    </button>
-  </form>
+  <div class="add">
+    <button mat-flat-button (click)="addProject()"><mat-icon>add</mat-icon> פרויקט חדש</button>
+  </div>
 
   @for (p of store.projects(); track p.id) {
     <article class="project" [class.inactive]="!p.active">
@@ -52,9 +46,13 @@
         </button>
       </div>
       @if (!cur) {
-        <div class="warn">
-          <mat-icon inline>warning</mat-icon> אין תעריף — שעות ייספרו עם סכום 0
-        </div>
+        @if (p.noRate) {
+          <div class="muted">ללא תעריף</div>
+        } @else {
+          <div class="warn">
+            <mat-icon inline>warning</mat-icon> אין תעריף — שעות ייספרו עם סכום 0
+          </div>
+        }
       }
       @if (next) {
         <div class="muted">₪ {{ next.hourly }} החל מ-{{ dateLabel(next.startDate) }}</div>

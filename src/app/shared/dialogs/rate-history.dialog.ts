@@ -68,9 +68,13 @@ export interface RateHistoryData {
             </tr>
           } @empty {
             <tr>
-              <td colspan="4" class="warn">
-                <mat-icon inline>warning</mat-icon> אין תעריף — שעות ייספרו עם סכום 0
-              </td>
+              @if (project()?.noRate) {
+                <td colspan="4" class="muted">ללא תעריף</td>
+              } @else {
+                <td colspan="4" class="warn">
+                  <mat-icon inline>warning</mat-icon> אין תעריף — שעות ייספרו עם סכום 0
+                </td>
+              }
             </tr>
           }
         </tbody>

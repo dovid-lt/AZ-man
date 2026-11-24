@@ -58,7 +58,7 @@
         >
         <span class="num big">{{ l.ms | duration: true }}</span>
         <span class="num big money">{{ l.amount | money }}</span>
-        @if (l.unrated) {
+        @if (l.unrated && !p.noRate) {
           <span class="warn"><mat-icon inline>warning</mat-icon> ללא תעריף בתוקף</span>
         }
       </div>

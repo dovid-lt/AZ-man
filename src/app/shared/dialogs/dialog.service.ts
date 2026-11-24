@@ -9,7 +9,9 @@ import { BrokenListData, BrokenListDialog } from './broken-list.dialog';
 import { ConfirmData, ConfirmDialog } from './confirm.dialog';
 import { DayDetailDialog } from './day-detail.dialog';
 import { FixBrokenDialog } from './fix-broken.dialog';
+import { InitialRateData, InitialRateDialog, InitialRateResult } from './initial-rate.dialog';
 import { MidnightChoice, MidnightData, MidnightDialog } from './midnight.dialog';
+import { NewProjectDialog, NewProjectResult } from './new-project.dialog';
 import { PeriodDetailDialog } from './period-detail.dialog';
 import { RateChangeData, RateChangeDialog, RateChangeResult } from './rate-change.dialog';
 import { RateHistoryDialog } from './rate-history.dialog';
@@ -77,6 +79,14 @@ export class DialogService {
 
   rateChange(data: RateChangeData): Promise<RateChangeResult | undefined> {
     return this.open<RateChangeData, RateChangeResult>(RateChangeDialog, data, '480px');
+  }
+
+  newProject(): Promise<NewProjectResult | undefined> {
+    return this.open<object, NewProjectResult>(NewProjectDialog, {}, '420px');
+  }
+
+  initialRate(data: InitialRateData): Promise<InitialRateResult | undefined> {
+    return this.open<InitialRateData, InitialRateResult>(InitialRateDialog, data, '420px');
   }
 
   rateHistory(projectId: Id): Promise<unknown> {
