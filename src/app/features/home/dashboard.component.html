@@ -27,21 +27,75 @@
   </div>
 
   <h3>חמשת הימים האחרונים</h3>
-  <div class="days">
-    @for (d of lastDays(); track d.day) {
-      <button
-        class="day"
-        [class.today]="d.today"
-        [class.zero]="!d.totals.ms"
-        (click)="openDay(d.day)"
-      >
-        <app-day-label [time]="d.day" />
-        <span class="num">{{ d.totals.ms | duration }}</span>
-        <span class="num small">{{ d.totals.amount | money }}</span>
-        @if (d.broken) {
-          <span class="warn small"><mat-icon inline>link_off</mat-icon> {{ d.broken }}</span>
+  @if (rows().length) {
+    <table class="table days-table">
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          @if (multi()) {
+            <th>פרויקט</th>
+          }
+          <th>כניסה</th>
+          <th>יציאה</th>
+          <th>משך</th>
+          <th>סכום</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rows(); track r.key) {
+          <tr [class.active-row]="r.active" [class.broken-row]="r.broken">
+            <td><app-day-label [time]="r.day" /></td>
+            @if (multi()) {
+              <td>{{ projectName(r.shift.projectId) }}</td>
+            }
+            <td class="num">
+              @if (r.start != null) {
+                @if (r.contStart) {
+                  <mat-icon inline class="muted" matTooltip="המשך מהיום הקודם">redo</mat-icon>
+                }
+                {{ r.start | hm }}
+              } @else {
+                <mat-icon inline class="warn" matTooltip="חסרה כניסה — רשומה שבורה">link_off</mat-icon>
+              }
+            </td>
+            <td class="num">
+              @if (r.active) {
+                <span class="active-label">פעילה</span>
+              } @else if (r.contEnd) {
+                24:00
+                <mat-icon inline class="muted" matTooltip="ממשיכה ליום הבא">undo</mat-icon>
+              } @else if (r.end != null) {
+                {{ r.end | hm }}
+              } @else {
+                <mat-icon inline class="warn" matTooltip="חסרה יציאה — רשומה שבורה">link_off</mat-icon>
+              }
+            </td>
+            <td class="num">{{ r.broken ? '—' : (r.totals.ms | duration) }}</td>
+            <td class="num">
+              @if (r.broken) {
+                —
+              } @else {
+                {{ r.totals.amount | money }}
+                @if (r.totals.unratedMs) {
+                  <mat-icon inline class="warn" matTooltip="חלק מהזמן ללא תעריף">warning</mat-icon>
+                }
+              }
+            </td>
+            <td class="actions">
+              <button
+                mat-icon-button
+                [matTooltip]="r.broken ? 'תיקון רשומה שבורה' : 'עריכת משמרת'"
+                (click)="editRow(r)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </tr>
         }
-      </button>
-    }
-  </div>
+      </tbody>
+    </table>
+  } @else {
+    <p class="muted">אין רשומות בחמשת הימים האחרונים.</p>
+  }
 </section>
