@@ -1,0 +1,74 @@
+@if (project(); as p) {
+  <section class="card action">
+    <mat-form-field subscriptSizing="dynamic" class="project-select">
+      <mat-label>פרויקט נוכחי</mat-label>
+      <mat-select [ngModel]="p.id" (ngModelChange)="select($event)">
+        <mat-select-trigger>
+          {{ p.name }}
+          @if (open()) {
+            <mat-icon inline class="open-dot">radio_button_checked</mat-icon>
+          }
+        </mat-select-trigger>
+        @for (x of store.activeProjects(); track x.id) {
+          <mat-option [value]="x.id">
+            {{ x.name }}
+            @if (hasOpen(x.id)) {
+              <mat-icon inline class="open-dot" matTooltip="יש משמרת פתוחה"
+                >radio_button_checked</mat-icon
+              >
+            }
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="buttons">
+      <button
+        class="punch in"
+        [class.mismatch]="expected() !== 'in'"
+        [disabled]="busy()"
+        (click)="punch('in')"
+        [matTooltip]="expected() !== 'in' ? 'כבר יש כניסה פתוחה בפרויקט הזה' : ''"
+      >
+        @if (expected() !== 'in') {
+          <mat-icon class="mismatch-icon">warning</mat-icon>
+        }
+        <mat-icon>login</mat-icon>
+        <span>כניסה</span>
+      </button>
+      <button
+        class="punch out"
+        [class.mismatch]="expected() !== 'out'"
+        [disabled]="busy()"
+        (click)="punch('out')"
+        [matTooltip]="expected() !== 'out' ? 'אין כניסה פתוחה בפרויקט הזה' : ''"
+      >
+        @if (expected() !== 'out') {
+          <mat-icon class="mismatch-icon">warning</mat-icon>
+        }
+        <mat-icon>logout</mat-icon>
+        <span>יציאה</span>
+      </button>
+    </div>
+
+    @if (live(); as l) {
+      <div class="live">
+        <span
+          >בעבודה מ-<b class="num">{{ l.since | hm }}</b></span
+        >
+        <span class="num big">{{ l.ms | duration: true }}</span>
+        <span class="num big money">{{ l.amount | money }}</span>
+        @if (l.unrated) {
+          <span class="warn"><mat-icon inline>warning</mat-icon> ללא תעריף בתוקף</span>
+        }
+      </div>
+    } @else {
+      <div class="live idle muted">לא בעבודה בפרויקט הזה</div>
+    }
+  </section>
+} @else {
+  <section class="card action empty">
+    <p>אין עדיין פרויקטים פעילים.</p>
+    <a mat-flat-button routerLink="/settings">הוספת פרויקט בהגדרות</a>
+  </section>
+}

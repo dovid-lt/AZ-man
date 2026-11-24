@@ -1,0 +1,38 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.add {
+  margin-bottom: 16px;
+}
+
+.project {
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+
+  &.inactive {
+    background: var(--app-surface-2);
+  }
+
+  header {
+    margin-bottom: 8px;
+  }
+}
+
+.rates {
+  max-width: 480px;
+}
+
+.cell-input {
+  font: inherit;
+  padding: 4px 6px;
+  border: 1px solid var(--app-border);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  width: 150px;
+}

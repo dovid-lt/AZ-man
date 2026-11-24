@@ -1,0 +1,238 @@
+@use '@angular/material' as mat;
+/* אייקונים מקומיים: קובץ ה-woff2 נארז בבילד, בלי טעינה מהרשת */
+@use 'material-symbols/outlined';
+
+$font: 'Segoe UI', Tahoma, Arial, sans-serif;
+
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$green-palette,
+        theme-type: light,
+      ),
+      typography: (
+        plain-family: $font,
+        brand-family: $font,
+      ),
+      density: 0,
+    )
+  );
+
+  --app-in: #2e7d32;
+  --app-out: #c62828;
+  --app-money: #1b5e20;
+  --app-warn: #b26a00;
+  --app-danger: #c62828;
+  --app-muted: #6b6f76;
+  --app-border: #dfe3ea;
+  --app-surface: #ffffff;
+  --app-surface-2: #f6f8fb;
+  --app-alert-bg: #fff3e0;
+  --app-alert-fg: #b23c00;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: $font;
+  background: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+}
+
+/* ---------- עזרי עיצוב משותפים ---------- */
+
+/* מונים וסכומים: ספרות ברוחב קבוע כדי שהטקסט לא יקפוץ */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--app-muted);
+}
+
+.warn,
+.warn-title mat-icon {
+  color: var(--app-warn);
+}
+
+.warn-title {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+.error {
+  color: var(--app-danger);
+  font-size: 0.9rem;
+}
+
+.danger-text {
+  color: var(--app-danger) !important;
+}
+
+.mat-mdc-unelevated-button.danger {
+  --mat-button-filled-container-color: var(--app-danger);
+  --mat-button-filled-label-text-color: #fff;
+}
+
+.push-start {
+  margin-inline-end: auto !important;
+}
+
+.card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  padding: 20px;
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    margin: 20px 0 8px;
+    font-size: 1rem;
+    color: var(--app-muted);
+  }
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.grow {
+  flex: 1;
+  min-width: 160px;
+}
+
+.form {
+  display: flex !important;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.full {
+  width: 100%;
+}
+
+.summary-line {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.columns {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  > section {
+    flex: 1;
+    min-width: 260px;
+  }
+}
+
+.plain-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--app-border);
+  }
+}
+
+/* ---------- טבלאות ---------- */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 6px 8px;
+    text-align: start;
+    border-bottom: 1px solid var(--app-border);
+    vertical-align: middle;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--app-muted);
+    font-size: 0.85rem;
+  }
+
+  td.note {
+    max-width: 260px;
+    white-space: pre-wrap;
+    color: var(--app-muted);
+  }
+
+  &.clickable tbody tr {
+    cursor: pointer;
+
+    &:hover {
+      background: var(--app-surface-2);
+    }
+  }
+
+  tr.broken-row {
+    background: var(--app-alert-bg);
+  }
+}
+
+mat-icon[inline] {
+  vertical-align: middle;
+}
+
+/* ---------- הדפסה (דוחות לחשבוניות) ---------- */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  .card {
+    border: none;
+    padding: 0;
+  }
+}
+
+.mat-mdc-button.warn {
+  --mat-button-text-label-text-color: var(--app-warn);
+}

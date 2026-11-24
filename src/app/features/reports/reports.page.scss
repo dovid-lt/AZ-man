@@ -1,0 +1,79 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.controls {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.quick {
+  height: 72px;
+  min-width: 180px;
+  font-size: 1.4rem;
+  border-radius: 16px;
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.params {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.range-label {
+  min-width: 170px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.totals {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .warn {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .big {
+    font-size: 1.8rem;
+  }
+
+  .money {
+    color: var(--app-money);
+  }
+}
+
+tr.strong td {
+  font-weight: 600;
+}
+
+tr.sub td {
+  font-size: 0.9rem;
+}

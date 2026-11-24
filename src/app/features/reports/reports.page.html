@@ -1,0 +1,180 @@
+<section class="card controls no-print">
+  <button mat-flat-button class="quick" (click)="quick()">
+    <mat-icon>receipt_long</mat-icon>
+    {{ quickLabel() }}
+  </button>
+
+  <div class="params">
+    <mat-button-toggle-group [value]="params().kind" (change)="setKind($event.value)">
+      <mat-button-toggle value="day">יום</mat-button-toggle>
+      <mat-button-toggle value="week">שבוע</mat-button-toggle>
+      <mat-button-toggle value="month">חודש</mat-button-toggle>
+      <mat-button-toggle value="custom">טווח חופשי</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (params().kind === 'custom') {
+      <div class="row">
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>מ-</mat-label>
+          <input matInput type="date" [ngModel]="params().from" (ngModelChange)="setFrom($event)" />
+        </mat-form-field>
+        <mat-form-field subscriptSizing="dynamic">
+          <mat-label>עד-</mat-label>
+          <input matInput type="date" [ngModel]="params().to" (ngModelChange)="setTo($event)" />
+        </mat-form-field>
+      </div>
+    } @else {
+      <div class="stepper">
+        <button mat-icon-button matTooltip="הקודם" (click)="step(-1)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <span class="range-label">{{ label() }}</span>
+        <button mat-icon-button matTooltip="הבא" (click)="step(1)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button mat-button (click)="today()">היום</button>
+      </div>
+    }
+
+    <app-project-filter [value]="params().projects" (valueChange)="setFilter($event)" />
+  </div>
+</section>
+
+<section class="card report">
+  <header class="section-head">
+    <h2>דוח {{ label() }}</h2>
+    <button mat-stroked-button class="no-print" (click)="print()">
+      <mat-icon>print</mat-icon> הדפסה
+    </button>
+  </header>
+
+  <div class="totals">
+    <div>
+      <span class="muted">סך שעות</span>
+      <b class="num big">{{ sum().totals.ms | duration }}</b>
+    </div>
+    <div>
+      <span class="muted">סכום</span>
+      <b class="num big money">{{ sum().totals.amount | money }}</b>
+    </div>
+    @if (sum().totals.unratedMs) {
+      <div class="warn">
+        <mat-icon inline>warning</mat-icon>
+        {{ sum().totals.unratedMs | duration }} שעות ללא תעריף (סכום 0)
+      </div>
+    }
+    @if (sum().broken.length) {
+      <div class="warn">
+        <mat-icon inline>link_off</mat-icon>
+        {{ sum().broken.length }} רשומות שבורות לא נכללו בסכום
+        <button
+          mat-button
+          class="no-print"
+          (click)="dialogs.brokenList(params().projects, range())"
+        >
+          תיקון
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (projectRows().length) {
+    <h3>לפי פרויקט</h3>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>פרויקט</th>
+          <th>תעריף</th>
+          <th>שעות</th>
+          <th>סכום</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (p of projectRows(); track p.id) {
+          <tr class="strong">
+            <td>{{ p.name }}</td>
+            <td>{{ p.rates.length === 1 ? rateText([p.rates[0].rate]) : '' }}</td>
+            <td class="num">{{ p.totals.ms | duration }}</td>
+            <td class="num">{{ p.totals.amount | money }}</td>
+          </tr>
+          @if (p.rates.length > 1) {
+            @for (l of p.rates; track l.rate) {
+              <tr class="sub" [class.warn]="l.rate == null">
+                <td></td>
+                <td>{{ rateText([l.rate]) }}</td>
+                <td class="num">{{ l.totals.ms | duration }}</td>
+                <td class="num">{{ l.totals.amount | money }}</td>
+              </tr>
+            }
+          }
+        }
+      </tbody>
+    </table>
+  }
+
+  <h3>משמרות</h3>
+  @if (rows().length) {
+    <table class="table shifts">
+      <thead>
+        <tr>
+          <th>תאריך</th>
+          @if (multi()) {
+            <th>פרויקט</th>
+          }
+          <th>כניסה</th>
+          <th>יציאה</th>
+          <th>משך</th>
+          <th>תעריף</th>
+          <th>סכום</th>
+          <th>הערה</th>
+          <th class="no-print"></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rows(); track r.key) {
+          @if (r.type === 'shift') {
+            <tr>
+              <td><app-day-label [time]="r.start" /></td>
+              @if (multi()) {
+                <td>{{ store.projectName(r.shift.projectId) }}</td>
+              }
+              <td class="num">{{ r.start | hm }}</td>
+              <td class="num">{{ r.open ? 'פתוחה' : (r.end | hm) }}</td>
+              <td class="num">{{ r.totals.ms | duration }}</td>
+              <td [class.warn]="r.totals.unratedMs">{{ rateText(r.rates) }}</td>
+              <td class="num">{{ r.totals.amount | money }}</td>
+              <td class="note">{{ r.shift.note }}</td>
+              <td class="no-print">
+                <button
+                  mat-icon-button
+                  matTooltip="עריכה והערה"
+                  (click)="dialogs.editShift(r.shift.id)"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </td>
+            </tr>
+          } @else {
+            <tr class="broken-row">
+              <td><app-day-label [time]="r.time" /></td>
+              @if (multi()) {
+                <td>{{ store.projectName(r.shift.projectId) }}</td>
+              }
+              <td class="num">{{ r.shift.start != null ? (r.shift.start | hm) : '?' }}</td>
+              <td class="num">{{ r.shift.end != null ? (r.shift.end | hm) : '?' }}</td>
+              <td colspan="3" class="warn">
+                <mat-icon inline>link_off</mat-icon> רשומה שבורה — לא נכללת בסכום
+              </td>
+              <td class="note">{{ r.shift.note }}</td>
+              <td class="no-print">
+                <button mat-button (click)="dialogs.fixBroken(r.shift.id)">תיקון</button>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="muted">אין משמרות בטווח הזה.</p>
+  }
+</section>

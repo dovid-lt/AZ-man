@@ -1,0 +1,100 @@
+<section class="card">
+  <h2>פרויקטים ותעריפים</h2>
+
+  <form class="row add" (submit)="$event.preventDefault(); addProject()">
+    <mat-form-field subscriptSizing="dynamic" class="grow">
+      <mat-label>שם פרויקט חדש</mat-label>
+      <input matInput name="newName" [ngModel]="newName()" (ngModelChange)="newName.set($event)" />
+    </mat-form-field>
+    <button mat-flat-button type="submit" [disabled]="!newName().trim()">
+      <mat-icon>add</mat-icon> הוספה
+    </button>
+  </form>
+
+  @for (p of store.projects(); track p.id) {
+    <article class="project" [class.inactive]="!p.active">
+      <header class="row">
+        <mat-form-field subscriptSizing="dynamic" class="grow">
+          <mat-label>שם</mat-label>
+          <input matInput [ngModel]="p.name" (change)="rename(p, $any($event.target).value)" />
+        </mat-form-field>
+        <mat-slide-toggle [checked]="p.active" (change)="setActive(p, $event)">
+          {{ p.active ? 'פעיל' : 'לא פעיל' }}
+        </mat-slide-toggle>
+        <button
+          mat-icon-button
+          [disabled]="store.hasRecords(p.id)"
+          [matTooltip]="
+            store.hasRecords(p.id) ? 'לפרויקט יש רשומות — אפשר רק להעביר ללא פעיל' : 'מחיקת הפרויקט'
+          "
+          (click)="deleteProject(p)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </header>
+
+      <table class="table rates">
+        <thead>
+          <tr>
+            <th>מתאריך</th>
+            <th>תעריף לשעה (₪)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of sortedRates(p); track r.id) {
+            <tr>
+              <td>
+                <input
+                  class="cell-input"
+                  type="date"
+                  [value]="r.startDate"
+                  (change)="setRateDate(p, r, $any($event.target).value)"
+                />
+              </td>
+              <td>
+                <input
+                  class="cell-input num"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  [value]="r.hourly"
+                  (change)="setRateValue(p, r, $any($event.target).value)"
+                />
+              </td>
+              <td>
+                <button mat-icon-button matTooltip="מחיקת התעריף" (click)="deleteRate(p, r)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="warn">
+                <mat-icon inline>warning</mat-icon> אין תעריף — שעות ייספרו עם סכום 0
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <button mat-button (click)="addRate(p)"><mat-icon>add</mat-icon> הוספת תעריף</button>
+    </article>
+  } @empty {
+    <p class="muted">אין עדיין פרויקטים.</p>
+  }
+</section>
+
+<section class="card">
+  <h2>כללי</h2>
+  <mat-form-field>
+    <mat-label>התראת משמרת ארוכה אחרי (שעות)</mat-label>
+    <input
+      matInput
+      type="number"
+      min="1"
+      step="0.5"
+      [value]="store.settings().longShiftHours"
+      (change)="setLongShift($any($event.target).value)"
+    />
+  </mat-form-field>
+</section>

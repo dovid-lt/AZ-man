@@ -1,0 +1,47 @@
+<mat-toolbar class="toolbar no-print">
+  <span class="brand"><mat-icon>schedule</mat-icon> שעות עבודה</span>
+
+  <nav mat-tab-nav-bar [tabPanel]="panel" class="tabs">
+    @for (t of tabs; track t.path) {
+      <a
+        mat-tab-link
+        [routerLink]="t.path"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: t.exact }"
+        [active]="rla.isActive"
+      >
+        {{ t.label }}
+      </a>
+    }
+  </nav>
+
+  <span class="spacer"></span>
+
+  <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="תפריט">
+    <mat-icon>more_vert</mat-icon>
+  </button>
+  <mat-menu #menu="matMenu" xPosition="before">
+    <button mat-menu-item (click)="addShift()">
+      <mat-icon>more_time</mat-icon> הוספת משמרת בדיעבד
+    </button>
+    <button mat-menu-item (click)="punchAt('in')">
+      <mat-icon>login</mat-icon> כניסה בשעה אחרת
+    </button>
+    <button mat-menu-item (click)="punchAt('out')">
+      <mat-icon>logout</mat-icon> יציאה בשעה אחרת
+    </button>
+    <button mat-menu-item (click)="brokenAll()"><mat-icon>link_off</mat-icon> רשומות שבורות</button>
+    <button mat-menu-item routerLink="/settings">
+      <mat-icon>settings</mat-icon> הגדרות: פרויקטים ותעריפים
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<app-long-shift-alert class="no-print" />
+
+<mat-tab-nav-panel #panel>
+  <main class="page">
+    <router-outlet />
+  </main>
+</mat-tab-nav-panel>

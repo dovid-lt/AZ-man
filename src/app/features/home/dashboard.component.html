@@ -1,0 +1,47 @@
+<section class="card">
+  <header class="section-head">
+    <h2>דשבורד</h2>
+    <app-project-filter [value]="filter()" (valueChange)="setFilter($event)" />
+  </header>
+
+  <div class="counters">
+    @for (c of counters(); track c.kind) {
+      <button class="counter" (click)="openCounter(c)" matTooltip="לחיצה לפירוט">
+        <span class="title">{{ c.title }}</span>
+        <span class="hours num">{{ c.sum.totals.ms | duration }}</span>
+        <span class="amount num">{{ c.sum.totals.amount | money }}</span>
+        <span class="flags">
+          @if (c.sum.totals.unratedMs) {
+            <span class="warn" matTooltip="זמן ללא תעריף — נספר בשעות, סכום 0">
+              <mat-icon inline>warning</mat-icon> {{ c.sum.totals.unratedMs | duration }} ללא תעריף
+            </span>
+          }
+          @if (c.sum.broken.length) {
+            <a class="warn broken-link" (click)="openBroken(c.sum.range, $event)">
+              <mat-icon inline>link_off</mat-icon> {{ c.sum.broken.length }} שבורות — תיקון
+            </a>
+          }
+        </span>
+      </button>
+    }
+  </div>
+
+  <h3>חמשת הימים האחרונים</h3>
+  <div class="days">
+    @for (d of lastDays(); track d.day) {
+      <button
+        class="day"
+        [class.today]="d.today"
+        [class.zero]="!d.totals.ms"
+        (click)="openDay(d.day)"
+      >
+        <app-day-label [time]="d.day" />
+        <span class="num">{{ d.totals.ms | duration }}</span>
+        <span class="num small">{{ d.totals.amount | money }}</span>
+        @if (d.broken) {
+          <span class="warn small"><mat-icon inline>link_off</mat-icon> {{ d.broken }}</span>
+        }
+      </button>
+    }
+  </div>
+</section>
