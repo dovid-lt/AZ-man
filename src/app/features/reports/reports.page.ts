@@ -13,6 +13,7 @@ import { Id, ProjectFilter, RangeKind, Shift, brokenTime } from '../../core/mode
 import { filteredProjects, summarize } from '../../core/summary';
 import { UiStore } from '../../core/ui.store';
 import { dateKey, monthName } from '../../core/time';
+import { Cell, Row, buildXlsx, downloadBlob, excelDate, excelDuration } from '../../core/xlsx';
 import { DayLabelComponent } from '../../shared/day-label.component';
 import { DialogService } from '../../shared/dialogs/dialog.service';
 import { FORMAT_PIPES } from '../../shared/format.pipes';
@@ -183,5 +184,93 @@ export class ReportsPage {
 
   protected print(): void {
     window.print();
+  }
+
+  /** ייצוא הדוח המוצג לקובץ Excel: גיליון סיכום וגיליון משמרות. */
+  protected exportExcel(): void {
+    const s = this.sum();
+    const multi = this.multi();
+    const b = (v: string): Cell => ({ v, bold: true });
+    const dur = (ms: number, bold = false): Cell => ({ v: excelDuration(ms), s: 'duration', bold });
+    const money = (n: number, bold = false): Cell => ({ v: n, s: 'money', bold });
+    const rate = (r: number | null): Cell => (r == null ? { v: 'ללא תעריף' } : money(r));
+
+    const summary: Row[] = [
+      [b(`דוח ${this.label()}`)],
+      [],
+      ['סך שעות', dur(s.totals.ms, true)],
+      ['סכום', money(s.totals.amount, true)],
+    ];
+    if (s.totals.unratedMs) summary.push(['שעות ללא תעריף', dur(s.totals.unratedMs)]);
+    if (s.broken.length) summary.push(['רשומות שבורות (לא נכללו)', s.broken.length]);
+    if (this.projectRows().length) {
+      summary.push([], [b('פרויקט'), b('תעריף'), b('שעות'), b('סכום')]);
+      for (const p of this.projectRows()) {
+        summary.push([
+          b(p.name),
+          p.rates.length === 1 ? rate(p.rates[0].rate) : null,
+          dur(p.totals.ms, true),
+          money(p.totals.amount, true),
+        ]);
+        if (p.rates.length > 1) {
+          for (const l of p.rates)
+            summary.push([null, rate(l.rate), dur(l.totals.ms), money(l.totals.amount)]);
+        }
+      }
+    }
+
+    const head = [
+      'תאריך',
+      ...(multi ? ['פרויקט'] : []),
+      'כניסה',
+      'יציאה',
+      'משך',
+      'תעריף',
+      'סכום',
+      'הערה',
+    ];
+    const shifts: Row[] = [head.map(b)];
+    for (const r of this.rows()) {
+      const project = multi ? [this.store.projectName(r.shift.projectId)] : [];
+      if (r.type === 'shift') {
+        shifts.push([
+          { v: excelDate(r.start), s: 'date' },
+          ...project,
+          { v: excelDate(r.start), s: 'time' },
+          r.open ? 'פתוחה' : { v: excelDate(r.end), s: 'time' },
+          dur(r.totals.ms),
+          r.rates.length === 1 ? rate(r.rates[0]) : this.rateText(r.rates),
+          money(r.totals.amount),
+          r.shift.note,
+        ]);
+      } else {
+        const t = (v: number | null): Cell | string =>
+          v == null ? '?' : { v: excelDate(v), s: 'time' };
+        shifts.push([
+          { v: excelDate(r.time), s: 'date' },
+          ...project,
+          t(r.shift.start),
+          t(r.shift.end),
+          'רשומה שבורה — לא נכללת בסכום',
+          null,
+          null,
+          r.shift.note,
+        ]);
+      }
+    }
+    if (this.rows().length) {
+      const pad = multi ? [null] : [];
+      shifts.push(
+        [],
+        [b('סה״כ'), ...pad, null, null, dur(s.totals.ms, true), null, money(s.totals.amount, true)],
+      );
+    }
+
+    const blob = buildXlsx([
+      { name: 'סיכום', rows: summary, widths: [26, 14, 12, 14] },
+      { name: 'משמרות', rows: shifts, widths: [12, ...(multi ? [18] : []), 9, 9, 10, 14, 14, 40] },
+    ]);
+    const safe = this.label().replace(/[\\/:*?"<>|]/g, '-');
+    downloadBlob(blob, `דוח ${safe}.xlsx`);
   }
 }

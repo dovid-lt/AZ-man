@@ -43,9 +43,12 @@
 <section class="card report">
   <header class="section-head">
     <h2>דוח {{ label() }}</h2>
-    <button mat-stroked-button class="no-print" (click)="print()">
-      <mat-icon>print</mat-icon> הדפסה
-    </button>
+    <div class="actions no-print">
+      <button mat-stroked-button (click)="exportExcel()">
+        <mat-icon>table_view</mat-icon> ייצוא לאקסל
+      </button>
+      <button mat-stroked-button (click)="print()"><mat-icon>print</mat-icon> הדפסה</button>
+    </div>
   </header>
 
   <div class="totals">

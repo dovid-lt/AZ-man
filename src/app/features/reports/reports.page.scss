@@ -77,3 +77,9 @@ tr.strong td {
 tr.sub td {
   font-size: 0.9rem;
 }
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
