@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "az-man",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-11-24",
+  "upload_source_maps": true,
+  "assets": {
+    // הפלט של @angular/build:application
+    "directory": "./dist/az-man/browser",
+    "binding": "ASSETS",
+    // כל נתיב שאינו קובץ קיים מחזיר index.html (Angular Router)
+    "not_found_handling": "single-page-application",
+    // רק /api/* מגיע לקוד ה-Worker; כל השאר מוגש ישירות כקבצים סטטיים (ללא חיוב)
+    "run_worker_first": ["/api/*"]
+  }
+}
