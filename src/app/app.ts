@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -22,6 +23,7 @@ import type { Direction } from './core/punch.service';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
+    MatDividerModule,
     MatTooltip,
     LongShiftAlertComponent,
   ],
@@ -37,6 +39,7 @@ export class App {
   protected readonly tabs = [
     { path: '/', label: 'פעולה ודשבורד', exact: true },
     { path: '/reports', label: 'דוחות', exact: false },
+    { path: '/about', label: 'אודות ועזרה', exact: false },
   ];
 
   protected addShift(): void {

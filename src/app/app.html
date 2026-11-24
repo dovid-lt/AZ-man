@@ -1,5 +1,5 @@
 <mat-toolbar class="toolbar no-print">
-  <span class="brand"><mat-icon>schedule</mat-icon> שעות עבודה</span>
+  <span class="brand"><mat-icon>schedule</mat-icon> ה-זמן</span>
 
   <nav mat-tab-nav-bar [tabPanel]="panel" class="tabs">
     @for (t of tabs; track t.path) {
@@ -21,19 +21,34 @@
   <button mat-icon-button [matMenuTriggerFor]="menu" matTooltip="תפריט">
     <mat-icon>more_vert</mat-icon>
   </button>
-  <mat-menu #menu="matMenu" xPosition="before">
+  <mat-menu #menu="matMenu" xPosition="before" class="app-menu">
+    <div class="menu-section">רישום שעות</div>
     <button mat-menu-item (click)="addShift()">
-      <mat-icon>more_time</mat-icon> הוספת משמרת בדיעבד
+      <mat-icon>more_time</mat-icon>
+      <span>הוספת משמרת בדיעבד</span>
     </button>
     <button mat-menu-item (click)="punchAt('in')">
-      <mat-icon>login</mat-icon> כניסה בשעה אחרת
+      <mat-icon>login</mat-icon>
+      <span>כניסה בשעה אחרת</span>
     </button>
     <button mat-menu-item (click)="punchAt('out')">
-      <mat-icon>logout</mat-icon> יציאה בשעה אחרת
+      <mat-icon>logout</mat-icon>
+      <span>יציאה בשעה אחרת</span>
     </button>
-    <button mat-menu-item (click)="brokenAll()"><mat-icon>link_off</mat-icon> רשומות שבורות</button>
+    <button mat-menu-item (click)="brokenAll()">
+      <mat-icon>link_off</mat-icon>
+      <span>רשומות שבורות</span>
+    </button>
+
+    <mat-divider />
+
     <button mat-menu-item routerLink="/settings">
-      <mat-icon>settings</mat-icon> הגדרות: פרויקטים ותעריפים
+      <mat-icon>settings</mat-icon>
+      <span>פרויקטים ותעריפים</span>
+    </button>
+    <button mat-menu-item routerLink="/about">
+      <mat-icon>help_outline</mat-icon>
+      <span>אודות ועזרה</span>
     </button>
   </mat-menu>
 </mat-toolbar>

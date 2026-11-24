@@ -236,3 +236,32 @@ mat-icon[inline] {
 .mat-mdc-button.warn {
   --mat-button-text-label-text-color: var(--app-warn);
 }
+
+/* ---------- תפריט ראשי ---------- */
+
+.app-menu.mat-mdc-menu-panel {
+  min-width: 240px;
+  border-radius: 12px;
+  padding-block: 4px;
+
+  .menu-section {
+    padding: 10px 16px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 44px;
+    gap: 4px;
+
+    .mat-icon {
+      color: var(--mat-sys-on-surface-variant);
+    }
+  }
+
+  .mat-divider {
+    margin-block: 4px;
+  }
+}

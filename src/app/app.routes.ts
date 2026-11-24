@@ -16,5 +16,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/settings/settings.page').then((m) => m.SettingsPage),
     title: 'הגדרות — שעות עבודה',
   },
+  {
+    path: 'about',
+    loadComponent: () => import('./features/about/about.page').then((m) => m.AboutPage),
+    title: 'אודות ועזרה — שעות עבודה',
+  },
   { path: '**', redirectTo: '' },
 ];
