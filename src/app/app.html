@@ -1,8 +1,8 @@
 <mat-toolbar class="toolbar no-print">
-  <span class="brand"><mat-icon>schedule</mat-icon> ה-זמן</span>
+  <span class="brand"><mat-icon>schedule</mat-icon>הז-מן</span>
 
-  <nav mat-tab-nav-bar [tabPanel]="panel" class="tabs">
-    @for (t of tabs; track t.path) {
+  <nav mat-tab-nav-bar [tabPanel]="panel" class="tabs" mat-stretch-tabs="false">
+    @for (t of tabs(); track t.path) {
       <a
         mat-tab-link
         [routerLink]="t.path"
@@ -40,16 +40,15 @@
       <span>רשומות שבורות</span>
     </button>
 
-    <mat-divider />
-
-    <button mat-menu-item routerLink="/settings">
-      <mat-icon>settings</mat-icon>
-      <span>פרויקטים ותעריפים</span>
-    </button>
-    <button mat-menu-item routerLink="/about">
-      <mat-icon>help_outline</mat-icon>
-      <span>אודות ועזרה</span>
-    </button>
+    @if (menuTabs().length) {
+      <mat-divider />
+      @for (t of menuTabs(); track t.path) {
+        <button mat-menu-item [routerLink]="t.path">
+          <mat-icon>{{ t.icon }}</mat-icon>
+          <span>{{ t.label }}</span>
+        </button>
+      }
+    }
   </mat-menu>
 </mat-toolbar>
 

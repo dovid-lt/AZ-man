@@ -19,6 +19,11 @@ import { MatIconModule } from '@angular/material/icon';
         הפרויקט בקוד פתוח:
         <a [href]="repoUrl" target="_blank" rel="noopener" dir="ltr">{{ repoUrl }}</a>
       </p>
+
+      <p>
+        <mat-icon inline>person</mat-icon>
+        נכתב על ידי דוד מחברת Pitronal.
+      </p>
     </section>
   `,
   styles: `
